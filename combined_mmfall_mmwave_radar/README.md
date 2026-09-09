@@ -2,6 +2,8 @@
 
 This directory contains the cross-dataset exploration, data merging, baseline training, and 3-representation research benchmarks for the **Combined mmFall + TI IWR6843 Dataset** (merging 77 GHz and 60–64 GHz radar data).
 
+For detailed mathematical formulations, sensor harmonization strategies, and multi-sensor processing documentation, refer to [COMBINED_DATASETS_DATA_PROCESSING.md](docs/COMBINED_DATASETS_DATA_PROCESSING.md).
+
 ---
 
 ## 📁 Directory Structure & Sequential Workflow
@@ -26,9 +28,9 @@ combined_mmfall_mmwave_radar/
 │       Model checkpoint saved to: models/cnn_combined_best.pth
 │
 └── representations/                                           # STEP 4: 3-Representation Benchmark
-    ├── train_rep1_spectrogram_resnet18.ipynb                  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
-    ├── train_rep2_projections_resnet18.ipynb                  # Rep 2: Orthogonal Spatial Projections (ResNet-18)
-    ├── train_rep3_pointnet_3d.ipynb                           # Rep 3: Native 3D Point Cloud (PointNet++)
+    ├── mmfall/representations/train_rep1_spectrogram_resnet18.ipynb                  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+    ├── mmfall/representations/train_rep2_projections_resnet18.ipynb                  # Rep 2: Orthogonal Spatial Projections (ResNet-18)
+    ├── mmfall/representations/train_rep3_pointnet_3d.ipynb                           # Rep 3: Native 3D Point Cloud (PointNet++)
     └── compare_radar_representations.ipynb                     # Comparative benchmark synthesis & ROC curves
 ```
 
@@ -40,7 +42,7 @@ combined_mmfall_mmwave_radar/
   1. **TI IWR1443 (77 GHz)**: 4D point clouds from `mmFall` (1,182 motion windows).
   2. **TI IWR6843 (60–64 GHz)**: 4D point clouds from `TI IWR6843` (728 motion windows across 3 subjects).
 * **Total Combined Samples**: **1,910 balanced motion clips** (955 Fall : 955 ADL).
-* **Unified Preprocessed Tensors** (in [`datasets/preprocessed/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed)):
+* **Unified Preprocessed Tensors** (in [`datasets/preprocessed/`](datasets/preprocessed)):
   * `X_combined_clean_balanced.npy`: Shape `(1910, 10, 64, 4)`
   * `y_combined_clean_balanced.npy`: Shape `(1910,)` ($0 = \text{ADL}, 1 = \text{Fall}$)
   * `X_rep1_spectrogram_combined.npy`: Shape `(1910, 3, 64, 64)`

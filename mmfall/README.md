@@ -2,7 +2,7 @@
 
 This directory contains the complete exploration, data cleaning, baseline training, and 3-representation research benchmark workflows for the **`mmFall` 4D mmWave Radar Dataset** (77 GHz, TI IWR1443).
 
-For detailed mathematical formulations and step-by-step pipeline explanations, refer to [MMFALL_DATA_PROCESSING.md](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/docs/MMFALL_DATA_PROCESSING.md) and the original paper [mmfallpaper.pdf](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/docs/mmfallpaper.pdf) in `docs/`.
+For detailed mathematical formulations and step-by-step pipeline explanations, refer to [MMFALL_DATA_PROCESSING.md](docs/MMFALL_DATA_PROCESSING.md) and the original paper [mmfallpaper.pdf](docs/mmfallpaper.pdf) in `docs/`.
 
 ---
 
@@ -30,9 +30,9 @@ mmfall/
 │       Model checkpoint saved to: models/cnn_mmfall_best.pth
 │
 └── representations/                                   # STEP 4: 3-Representation Benchmark
-    ├── train_rep1_spectrogram_resnet18.ipynb          # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
-    ├── train_rep2_projections_resnet18.ipynb          # Rep 2: Orthogonal Spatial Projections (ResNet-18)
-    ├── train_rep3_pointnet_3d.ipynb                   # Rep 3: Native 3D Point Cloud (PointNet++)
+    ├── mmfall/representations/train_rep1_spectrogram_resnet18.ipynb          # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+    ├── mmfall/representations/train_rep2_projections_resnet18.ipynb          # Rep 2: Orthogonal Spatial Projections (ResNet-18)
+    ├── mmfall/representations/train_rep3_pointnet_3d.ipynb                   # Rep 3: Native 3D Point Cloud (PointNet++)
     └── compare_radar_representations.ipynb             # Comparative benchmark synthesis & ROC curves
 ```
 
@@ -40,8 +40,8 @@ mmfall/
 
 ## 📊 Dataset & Model Inputs
 
-* **Raw Data**: Located in [`datasets/mmfall/data/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/mmfall/data).
-* **Preprocessed Balanced Tensors**: Located in [`datasets/preprocessed/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed):
+* **Raw Data**: Located in [`datasets/mmfall/data/`](datasets/mmfall/data).
+* **Preprocessed Balanced Tensors**: Located in [`datasets/preprocessed/`](datasets/preprocessed):
   * `X_mmfall_clean_balanced.npy`: Shape `(1182, 10, 64, 4)`
   * `y_mmfall_clean_balanced.npy`: Shape `(1182,)` ($0 = \text{ADL}, 1 = \text{Fall}$)
   * `mmfall_cleaned_metadata.csv`: Motion clip metadata & statistics

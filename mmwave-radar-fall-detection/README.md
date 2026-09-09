@@ -2,6 +2,8 @@
 
 This directory contains the complete exploration, data cleaning, baseline CNN training, and 3-representation research benchmark workflows for the **TI IWR6843 mmWave Radar Fall Detection Dataset** (60–64 GHz).
 
+For detailed mathematical formulations, CSV schemas, and pipeline documentation, refer to [MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md](docs/MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md).
+
 ---
 
 ## 📁 Directory Structure & Sequential Workflow
@@ -27,9 +29,9 @@ mmwave-radar-fall-detection/
 │       Model checkpoint saved to: models/cnn_ti_best.pth
 │
 └── representations/                                           # STEP 4: 3-Representation Benchmark
-    ├── train_rep1_spectrogram_resnet18.ipynb                  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
-    ├── train_rep2_projections_resnet18.ipynb                  # Rep 2: Orthogonal Spatial Projections (ResNet-18)
-    ├── train_rep3_pointnet_3d.ipynb                           # Rep 3: Native 3D Point Cloud (PointNet++)
+    ├── mmfall/representations/train_rep1_spectrogram_resnet18.ipynb                  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+    ├── mmfall/representations/train_rep2_projections_resnet18.ipynb                  # Rep 2: Orthogonal Spatial Projections (ResNet-18)
+    ├── mmfall/representations/train_rep3_pointnet_3d.ipynb                           # Rep 3: Native 3D Point Cloud (PointNet++)
     └── compare_radar_representations.ipynb                     # Comparative benchmark synthesis & ROC curves
 ```
 
@@ -38,7 +40,7 @@ mmwave-radar-fall-detection/
 ## 📊 Dataset Specifications
 
 * **Hardware**: Texas Instruments IWR6843 mmWave radar sensor operating in the 60–64 GHz frequency band.
-* **Storage Location**: [`datasets/mmwave-radar-fall-detection/GatheredData/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/mmwave-radar-fall-detection/GatheredData).
+* **Storage Location**: [`datasets/mmwave-radar-fall-detection/GatheredData/`](datasets/mmwave-radar-fall-detection/GatheredData).
 * **Subjects**: 3 human participants (**Areeb**, **Raffay**, **Towsif**).
 * **Total Motion Trials**: **102 recordings** (~2.5s duration, ~25 frames at 10 FPS).
   * **51 Fall Recordings** (`Fall/` folder): Front Fall (21), Back Fall (15), Side Fall (15).

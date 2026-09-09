@@ -2,6 +2,10 @@
 
 This document provides an exhaustive, end-to-end technical reference explaining how raw 4D millimeter-wave (mmWave) radar data from the **`mmFall`** dataset is interpreted, filtered, labeled, and converted into training tensors across this repository.
 
+> **📖 Companion Processing Guides**:
+> * For the 60–64 GHz TI IWR6843 dataset, see [MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md](docs/MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md).
+> * For the unified multi-sensor benchmark, see [COMBINED_DATASETS_DATA_PROCESSING.md](docs/COMBINED_DATASETS_DATA_PROCESSING.md).
+
 ---
 
 ## 📑 Table of Contents
@@ -49,7 +53,7 @@ Each point vector consists of **15 attributes**:
 
 ## 2. Dataset Hierarchy & File Taxonomy
 
-The raw files are located under [`datasets/mmfall/data/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/mmfall/data):
+The raw files are located under [`datasets/mmfall/data/`](datasets/mmfall/data):
 
 ```text
 datasets/mmfall/data/
@@ -79,13 +83,13 @@ datasets/mmfall/data/
 * **`_j_` (Jumping - Class 0 ADL)**: Jumping vertically on the spot.
 
 ### Ground-Truth Timestamp Files (`.csv`)
-In `DS2`, every fall recording `.npy` is paired with a `.csv` file (e.g., [`DS2_bf_01.csv`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/mmfall/data/DS2/DS2_bf_01.csv)). These CSV files contain the **exact camera-verified frame indices** where the fall impact occurs (e.g., frames `193, 414, 649, 986, 1333`).
+In `DS2`, every fall recording `.npy` is paired with a `.csv` file (e.g., [`DS2_bf_01.csv`](datasets/mmfall/data/DS2/DS2_bf_01.csv)). These CSV files contain the **exact camera-verified frame indices** where the fall impact occurs (e.g., frames `193, 414, 649, 986, 1333`).
 
 ---
 
 ## 3. Outlier Filtering & 3D Room Coordinate Transformation
 
-Implemented in `MMfallDataCleaner` in [mmfall_data_preparation.ipynb](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/mmfall_data_preparation.ipynb#L240-L330):
+Implemented in `MMfallDataCleaner` in [mmfall_data_preparation.ipynb](mmfall/02_mmfall_data_preparation.ipynb):
 
 ### 3.1 Polar to Sensor Cartesian
 Using range $r$, azimuth $\theta_{\text{az}}$, and elevation $\phi_{\text{el}}$:
@@ -177,10 +181,10 @@ In natural motion, normal activities generate far more windows than brief fall e
 * **Final Dataset Size**: Exactly **1,182 balanced clips**.
 
 ### Preprocessed Artifacts
-Saved in [`datasets/preprocessed/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed):
-1. [`X_mmfall_clean_balanced.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/X_mmfall_clean_balanced.npy): Shape `(1182, 10, 64, 4)` containing $[\Delta x, \Delta y, z, v]$.
-2. [`y_mmfall_clean_balanced.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/y_mmfall_clean_balanced.npy): Shape `(1182,)` binary labels ($0 = \text{ADL}, 1 = \text{Fall}$).
-3. [`mmfall_cleaned_metadata.csv`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/mmfall_cleaned_metadata.csv): Per-window audit log containing `file`, `start_frame`, `end_frame`, `label`, and `height_drop`.
+Saved in [`datasets/preprocessed/`](datasets/preprocessed):
+1. [`X_mmfall_clean_balanced.npy`](datasets/preprocessed/X_mmfall_clean_balanced.npy): Shape `(1182, 10, 64, 4)` containing $[\Delta x, \Delta y, z, v]$.
+2. [`y_mmfall_clean_balanced.npy`](datasets/preprocessed/y_mmfall_clean_balanced.npy): Shape `(1182,)` binary labels ($0 = \text{ADL}, 1 = \text{Fall}$).
+3. [`mmfall_cleaned_metadata.csv`](datasets/preprocessed/mmfall_cleaned_metadata.csv): Per-window audit log containing `file`, `start_frame`, `end_frame`, `label`, and `height_drop`.
 
 ---
 
@@ -204,9 +208,9 @@ Micro-Doppler Spectrogram        Orthogonal Projections           Native 3D Poin
 
 | Metric / Dimension | Representation 1 (Kinematic) | Representation 2 (Spatial) | Representation 3 (Geometric) |
 | :--- | :--- | :--- | :--- |
-| **Tensor File** | [`X_rep1_spectrogram.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/X_rep1_spectrogram.npy) | [`X_rep2_projections.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/X_rep2_projections.npy) | [`X_rep3_pointset.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/X_rep3_pointset.npy) |
+| **Tensor File** | [`X_rep1_spectrogram.npy`](datasets/preprocessed/X_rep1_spectrogram.npy) | [`X_rep2_projections.npy`](datasets/preprocessed/X_rep2_projections.npy) | [`X_rep3_pointset.npy`](datasets/preprocessed/X_rep3_pointset.npy) |
 | **Tensor Shape** | `(1182, 3, 64, 64)` | `(1182, 3, 64, 64)` | `(1182, 5, 640)` |
-| **Label Vector** | [`y_rep1_spectrogram.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/y_rep1_spectrogram.npy) | [`y_rep2_projections.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/y_rep2_projections.npy) | [`y_rep3_pointset.npy`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/datasets/preprocessed/y_rep3_pointset.npy) |
+| **Label Vector** | [`y_rep1_spectrogram.npy`](datasets/preprocessed/y_rep1_spectrogram.npy) | [`y_rep2_projections.npy`](datasets/preprocessed/y_rep2_projections.npy) | [`y_rep3_pointset.npy`](datasets/preprocessed/y_rep3_pointset.npy) |
 | **Channels / Feats** | Velocity Density, Energy, $\Delta v / \Delta t$ | $XZ$ (Side view), $XY$ (Top view), $YZ$ | $x, y, z, v, \text{time\_norm}$ |
-| **Model Backbone** | [ResNet-18 (Rep 1)](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/train_rep1_spectrogram_resnet18.ipynb) | [ResNet-18 (Rep 2)](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/train_rep2_projections_resnet18.ipynb) | [PointNet++ (Rep 3)](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/train_rep3_pointnet_3d.ipynb) |
+| **Model Backbone** | [ResNet-18 (Rep 1)](mmfall/representations/train_rep1_spectrogram_resnet18.ipynb) | [ResNet-18 (Rep 2)](mmfall/representations/train_rep2_projections_resnet18.ipynb) | [PointNet++ (Rep 3)](mmfall/representations/train_rep3_pointnet_3d.ipynb) |
 | **Core Advantage** | Captures Doppler velocity acceleration spikes | Tracks vertical posture drop & ground spread | Operates directly on raw point clouds without grid binning |
