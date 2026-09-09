@@ -1,60 +1,46 @@
-# 📡 Combined mmFall + TI IWR6843 Multi-Sensor Fall Detection Pipeline & Benchmarks
+# Combined Multi-Sensor Dataset Pipeline
 
-This directory contains the cross-dataset exploration, data merging, baseline training, and 3-representation research benchmarks for the **Combined mmFall + TI IWR6843 Dataset** (merging 77 GHz and 60–64 GHz radar data).
+This directory contains the cross-dataset exploration, data preparation, baseline model training, and representation benchmark notebooks for the combined **mmFall (77 GHz)** and **TI IWR6843 (60–64 GHz)** datasets.
 
-For detailed mathematical formulations, sensor harmonization strategies, and multi-sensor processing documentation, refer to [COMBINED_DATASETS_DATA_PROCESSING.md](docs/COMBINED_DATASETS_DATA_PROCESSING.md).
+For detailed data processing documentation, see [COMBINED_DATASETS_DATA_PROCESSING.md](docs/COMBINED_DATASETS_DATA_PROCESSING.md).
 
 ---
 
-## 📁 Directory Structure & Sequential Workflow
+## Notebook Overview
 
 Execute the notebooks in the following order:
 
 ```text
 combined_mmfall_mmwave_radar/
-├── README.md                                                  # This workflow guide
-│
-├── 01_combined_datasets_explorer.ipynb                        # STEP 1: Cross-Dataset Explorer
-│   └── Compares 4D radar feature distributions, elevation patterns, and Doppler velocity
-│       profiles between mmFall (77 GHz) and TI IWR6843 (60 GHz).
-│
-├── 02_combined_datasets_data_preparation.ipynb                # STEP 2: Dataset Merging & Standardization
-│   └── Concatenates preprocessed feature arrays from mmFall (N=1,182) and TI IWR6843 (N=728)
-│       into a unified 1:1 balanced benchmark of 1,910 motion clips (955 Fall : 955 ADL).
-│       Exports unified tensors to: datasets/preprocessed/
-│
-├── 03_train_cnn_combined_datasets.ipynb                       # STEP 3: Multi-Sensor 4D CNN Baseline
-│   └── Trains a 2D Spatial-Temporal CNN (Radar4DCNN) on the combined multi-sensor dataset.
-│       Model checkpoint saved to: models/cnn_combined_best.pth
-│
-└── representations/                                           # STEP 4: 3-Representation Benchmark
-    ├── mmfall/representations/train_rep1_spectrogram_resnet18.ipynb                  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
-    ├── mmfall/representations/train_rep2_projections_resnet18.ipynb                  # Rep 2: Orthogonal Spatial Projections (ResNet-18)
-    ├── mmfall/representations/train_rep3_pointnet_3d.ipynb                           # Rep 3: Native 3D Point Cloud (PointNet++)
-    └── compare_radar_representations.ipynb                     # Comparative benchmark synthesis & ROC curves
+├── README.md                                         # Pipeline guide
+├── 01_combined_datasets_explorer.ipynb               # Step 1: Cross-dataset feature explorer
+├── 02_combined_datasets_data_preparation.ipynb       # Step 2: Combined dataset preparation (1,910 clips)
+├── 03_train_cnn_combined_datasets.ipynb              # Step 3: Baseline 2D Spatial-Temporal CNN
+└── representations/                                  # Step 4: Data Representation Benchmarks
+    ├── train_rep1_spectrogram_resnet18.ipynb         # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+    ├── train_rep2_projections_resnet18.ipynb         # Rep 2: Orthogonal Spatial Projections (ResNet-18)
+    ├── train_rep3_pointnet_3d.ipynb                  # Rep 3: Native 3D Point Set (PointNet)
+    └── compare_radar_representations.ipynb            # Representation Comparison
 ```
 
 ---
 
-## 📊 Combined Dataset Specifications
+## Preprocessed Arrays
 
-* **Sensors Unified**:
-  1. **TI IWR1443 (77 GHz)**: 4D point clouds from `mmFall` (1,182 motion windows).
-  2. **TI IWR6843 (60–64 GHz)**: 4D point clouds from `TI IWR6843` (728 motion windows across 3 subjects).
-* **Total Combined Samples**: **1,910 balanced motion clips** (955 Fall : 955 ADL).
-* **Unified Preprocessed Tensors** (in [`datasets/preprocessed/`](datasets/preprocessed)):
-  * `X_combined_clean_balanced.npy`: Shape `(1910, 10, 64, 4)`
-  * `y_combined_clean_balanced.npy`: Shape `(1910,)` ($0 = \text{ADL}, 1 = \text{Fall}$)
-  * `X_rep1_spectrogram_combined.npy`: Shape `(1910, 3, 64, 64)`
-  * `X_rep2_projections_combined.npy`: Shape `(1910, 3, 64, 64)`
-  * `X_rep3_pointset_combined.npy`: Shape `(1910, 5, 640)`
+* **Location**: `datasets/preprocessed/`
+* **Arrays**:
+  * `X_combined_clean_balanced.npy`: Base features (1,910 clips x 10 frames x 32 points x 4 features)
+  * `y_combined_clean_balanced.npy`: Binary labels (0 = ADL, 1 = Fall)
+  * `X_rep1_spectrogram_combined.npy`: Micro-Doppler Spectrograms (1,910 x 3 x 64 x 64)
+  * `X_rep2_projections_combined.npy`: Orthogonal Projections (1,910 x 3 x 64 x 64)
+  * `X_rep3_pointset_combined.npy`: Native 3D Point Sets (1,910 x 5 x 320)
 
 ---
 
-## 🔬 Multi-Representation Benchmark Summary
+## Representation Benchmarks
 
-| Representation | Format | Features / Channels | Model Backbone | Core Strength |
+| Representation | Format | Dimensions | Backbone | Focus |
 | :--- | :--- | :--- | :--- | :--- |
-| **Representation 1** | Micro-Doppler Spectrogram | $64 \times 64 \times 3$ (Density, Energy, Gradient) | **ResNet-18** *(Kinematic)* | High sensitivity to sudden velocity bursts during collapse |
-| **Representation 2** | Orthogonal Projections | $64 \times 64 \times 3$ ($XZ, XY, YZ$) | **ResNet-18** *(Spatial)* | Explicitly tracks vertical height drop and ground expansion |
-| **Representation 3** | Native 3D Point Set | $5 \times 640$ Matrix | **PointNet++** *(Geometric)* | Direct continuous 3D spatial coordinates without discretization |
+| **Representation 1** | Micro-Doppler Spectrogram | 64 x 64 x 3 | ResNet-18 | Velocity profiles and frequency shifts |
+| **Representation 2** | Orthogonal Projections | 64 x 64 x 3 | ResNet-18 | Spatial trajectory projections (XZ, XY, YZ) |
+| **Representation 3** | Native 3D Point Set | 5 x 320 | PointNet | Continuous 3D point cloud coordinates |

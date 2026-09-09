@@ -1,10 +1,10 @@
-# 📡 Combined mmFall + TI IWR6843 Dataset: Harmonization & Processing Guide
+# Combined mmFall + TI IWR6843 Dataset: Harmonization & Processing Guide
 
 This document provides an exhaustive, mathematically rigorous guide detailing how two heterogeneous millimeter-wave (mmWave) radar datasets—**`mmFall`** (77 GHz, TI IWR1443) and **`TI IWR6843`** (60–64 GHz)—are harmonized, standardized, merged, and transformed into a unified multi-sensor fall detection benchmark across this repository.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [Research Motivation: Cross-Sensor & Cross-Frequency Benchmark](#1-research-motivation-cross-sensor--cross-frequency-benchmark)
 2. [Comparative Sensor & Hardware Specifications](#2-comparative-sensor--hardware-specifications)
 3. [Multi-Sensor Data Harmonization Strategy](#3-multi-sensor-data-harmonization-strategy)
@@ -54,17 +54,19 @@ To make the datasets interchangeable and combinable, three harmonization steps a
   $$\Delta X = X - \bar{X}_{\text{window}}, \quad \Delta Y = Y - \bar{Y}_{\text{window}}, \quad Z = Z$$
   Absolute vertical elevation $Z$ is preserved identically across both sensors.
 
-### 3.2 Dynamic Point Cloud Standardization (Algorithm 1)
+### 3.2 Decoupled Spectrograms & Uniform Random Resampling ($N=32$)
 Radar point density per frame differs between the two sensors:
 * `mmFall`: $\sim 5 - 20$ points per frame.
 * `TI IWR6843`: $\sim 6 - 15$ points per frame.
 
-Both datasets are resampled to an exact dimension of **$N = 64$ points per frame** using the mean-preserving transformation:
-$$\mathbf{p}_i' = \sqrt{\frac{N}{M}} \cdot (\mathbf{p}_i - \hat{\mu}) + \hat{\mu}, \quad i = 1, \dots, M$$
-with centroid padding for remaining positions.
+#### 1. Decoupled Micro-Doppler Spectrograms (Representation 1)
+Micro-Doppler Spectrograms are generated **directly from raw, variable-length point clouds** prior to any padding or point-count standardization. Bins only true measured Doppler velocities and timestamps into the $64 \times 64$ grid across 3 channels (Velocity Density, Kinetic Energy weighted by $v^2$, and Velocity Gradient $\Delta v / \Delta t$). This guarantees zero contamination from artificial centroid duplicates or synthetic padding bins.
 
-![Algorithm 1 Oversampling Showcase](images/algorithm1_oversampling_showcase.png)
-*Figure 3.1: Cross-dataset standardization via Algorithm 1. Sparse radar returns ($M \in [5, 20]$ points per frame) across both mmFall (77 GHz) and TI (60 GHz) are geometrically rescaled and centroid-padded to a consistent $N=64$ points, enabling seamless joint training.*
+#### 2. Uniform Random Resampling ($N = 32$ Points per Frame)
+To eliminate artificial centroid clusters and spatial dilation previously caused by centroid-padding, point clouds are standardized to **$N = 32$ points per frame** using uniform random sampling with replacement from real points:
+* When $M < N$, draw indices uniformly with replacement from the $M$ valid points until reaching exactly $N$ points.
+* When $M \ge N$, draw $N$ points uniformly without replacement.
+* All kinematic values $[\Delta X, \Delta Y, Z, v_{\text{doppler}}]$ remain exact measured radar reflections without artificial distortion.
 
 ### 3.3 Temporal Clip Harmonization
 * **Duration**: Exactly 10 frames ($1.0\text{ second}$ of motion at $10\text{ FPS}$).
@@ -78,7 +80,7 @@ Simple sequential concatenation ($[\text{mmFall}, \text{TI}]$) would cause mini-
 
 The merging pipeline implements:
 1. **Direct Axis-0 Concatenation**:
-   $$\mathbf{X}_{\text{combined}} = \begin{bmatrix} \mathbf{X}_{\text{mmfall}} \\ \mathbf{X}_{\text{ti}} \end{bmatrix} \in \mathbb{R}^{1910 \times 10 \times 64 \times 4}$$
+   $$\mathbf{X}_{\text{combined}} = \begin{bmatrix} \mathbf{X}_{\text{mmfall}} \\ \mathbf{X}_{\text{ti}} \end{bmatrix} \in \mathbb{R}^{1910 \times 10 \times 32 \times 4}$$
    $$\mathbf{y}_{\text{combined}} = \begin{bmatrix} \mathbf{y}_{\text{mmfall}} \\ \mathbf{y}_{\text{ti}} \end{bmatrix} \in \{0, 1\}^{1910}$$
 
 2. **Deterministic Pseudo-Random Permutation**:
@@ -95,11 +97,11 @@ All unified tensors are exported to [`datasets/preprocessed/`](datasets/preproce
 
 | Tensor Filename | Shape | Data Type | Description |
 | :--- | :--- | :---: | :--- |
-| [`X_combined_clean_balanced.npy`](datasets/preprocessed/X_combined_clean_balanced.npy) | `(1910, 10, 64, 4)` | `float32` | Standardized 4D point cloud sequences $[\Delta x, \Delta y, z, v]$ |
+| [`X_combined_clean_balanced.npy`](datasets/preprocessed/X_combined_clean_balanced.npy) | `(1910, 10, 32, 4)` | `float32` | Standardized 4D point cloud sequences $[\Delta x, \Delta y, z, v]$ |
 | [`y_combined_clean_balanced.npy`](datasets/preprocessed/y_combined_clean_balanced.npy) | `(1910,)` | `int64` | Binary ground-truth labels (**955 Fall : 955 ADL**) |
-| [`X_rep1_spectrogram_combined.npy`](datasets/preprocessed/X_rep1_spectrogram_combined.npy) | `(1910, 3, 64, 64)` | `float32` | Unified Micro-Doppler Spectrograms |
+| [`X_rep1_spectrogram_combined.npy`](datasets/preprocessed/X_rep1_spectrogram_combined.npy) | `(1910, 3, 64, 64)` | `float32` | Unified Micro-Doppler Spectrograms (Decoupled from Raw Points) |
 | [`X_rep2_projections_combined.npy`](datasets/preprocessed/X_rep2_projections_combined.npy) | `(1910, 3, 64, 64)` | `float32` | Unified Dual Orthogonal 2D Spatial Projections |
-| [`X_rep3_pointset_combined.npy`](datasets/preprocessed/X_rep3_pointset_combined.npy) | `(1910, 5, 640)` | `float32` | Unified Unordered 3D Point Matrices $[\Delta x, \Delta y, z, v, t]$ |
+| [`X_rep3_pointset_combined.npy`](datasets/preprocessed/X_rep3_pointset_combined.npy) | `(1910, 5, 320)` | `float32` | Unified Unordered 3D Point Matrices $[\Delta x, \Delta y, z, v, t]$ |
 | `y_rep*_combined.npy` | `(1910,)` | `int64` | Identical ground-truth label vectors for all representations |
 
 ---

@@ -1,14 +1,14 @@
-# 📡 mmFall Radar Dataset: Interpretation & Processing Guide
+# mmFall Radar Dataset: Interpretation & Processing Guide
 
 This document provides an exhaustive, end-to-end technical reference explaining how raw 4D millimeter-wave (mmWave) radar data from the **`mmFall`** dataset is interpreted, filtered, labeled, and converted into training tensors across this repository.
 
-> **📖 Companion Processing Guides**:
+> ** Companion Processing Guides**:
 > * For the 60–64 GHz TI IWR6843 dataset, see [MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md](docs/MMWAVE_RADAR_FALL_DETECTION_DATA_PROCESSING.md).
 > * For the unified multi-sensor benchmark, see [COMBINED_DATASETS_DATA_PROCESSING.md](docs/COMBINED_DATASETS_DATA_PROCESSING.md).
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [Sensor Hardware & Raw Data Schema](#1-sensor-hardware--raw-data-schema)
 2. [Dataset Hierarchy & File Taxonomy](#2-dataset-hierarchy--file-taxonomy)
 3. [Outlier Filtering & 3D Room Coordinate Transformation](#3-outlier-filtering--3d-room-coordinate-transformation)
@@ -57,19 +57,19 @@ The raw files are located under [`datasets/mmfall/data/`](datasets/mmfall/data):
 
 ```text
 datasets/mmfall/data/
-├── DS0/                               # 2 hours continuous unannotated normal ADL (No falls)
-├── DS1/                               # Demo recordings: 4 falls and 4 normal activities
-│   ├── DS1_4falls.npy                 # Forward, backward, left, right falls
-│   └── DS1_4normal.npy                # Sit on floor, crouch, bend, jump
-└── DS2/                               # 35 Benchmark trial files (Falls + ADLs)
-    ├── DS2_bf_01.npy / .csv           # Backward Fall trials
-    ├── DS2_ff_01.npy / .csv           # Forward Fall trials
-    ├── DS2_lf_01.npy / .csv           # Left Fall trials
-    ├── DS2_rf_01.npy / .csv           # Right Fall trials
-    ├── DS2_sf_01.npy ... 05.npy       # Syncope / Slow Fall trials
-    ├── DS2_b_01.npy                   # Bending ADL trials
-    ├── DS2_c_01.npy ... 05.npy        # Crouching ADL trials
-    └── DS2_j_01.npy ... 03.npy        # Jumping ADL trials
+├── DS0/                              # 2 hours continuous unannotated normal ADL (No falls)
+├── DS1/                              # Demo recordings: 4 falls and 4 normal activities
+│   ├── DS1_4falls.npy                # Forward, backward, left, right falls
+│   └── DS1_4normal.npy               # Sit on floor, crouch, bend, jump
+└── DS2/                              # 35 Benchmark trial files (Falls + ADLs)
+    ├── DS2_bf_01.npy / .csv          # Backward Fall trials
+    ├── DS2_ff_01.npy / .csv          # Forward Fall trials
+    ├── DS2_lf_01.npy / .csv          # Left Fall trials
+    ├── DS2_rf_01.npy / .csv          # Right Fall trials
+    ├── DS2_sf_01.npy ... 05.npy      # Syncope / Slow Fall trials
+    ├── DS2_b_01.npy                  # Bending ADL trials
+    ├── DS2_c_01.npy ... 05.npy       # Crouching ADL trials
+    └── DS2_j_01.npy ... 03.npy       # Jumping ADL trials
 ```
 
 ### Action Code Glossary

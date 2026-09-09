@@ -1,10 +1,10 @@
-# 📡 TI IWR6843 mmWave Radar Dataset: Interpretation & Processing Guide
+# TI IWR6843 mmWave Radar Dataset: Interpretation & Processing Guide
 
 This document provides a comprehensive, mathematically rigorous technical guide explaining how raw 4D millimeter-wave (mmWave) radar data from the **TI IWR6843 mmWave Radar Fall Detection Dataset** (60–64 GHz) is interpreted, filtered, labeled, and converted into standardized training tensors across this repository.
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [Sensor Hardware & Raw CSV Data Schema](#1-sensor-hardware--raw-csv-data-schema)
 2. [Dataset Hierarchy & Subject Demographics](#2-dataset-hierarchy--subject-demographics)
 3. [Outlier Filtering & Spatial Bounding Box](#3-outlier-filtering--spatial-bounding-box)
@@ -48,25 +48,25 @@ The dataset comprises **102 motion recordings** collected across **3 human subje
 
 ```text
 datasets/mmwave-radar-fall-detection/GatheredData/
-├── Fall/                                      # 51 Fall Recordings (Class 1)
-│   ├── Areeb_front_1.csv ... 7.csv            # Front Falls (21 recordings)
+├── Fall/                                     # 51 Fall Recordings (Class 1)
+│   ├── Areeb_front_1.csv ... 7.csv           # Front Falls (21 recordings)
 │   ├── Raffay_front_1.csv ... 7.csv
 │   ├── Towsif_front_1.csv ... 7.csv
-│   ├── Areeb_back_1.csv ... 5.csv             # Back Falls (15 recordings)
+│   ├── Areeb_back_1.csv ... 5.csv            # Back Falls (15 recordings)
 │   ├── Raffay_back_1.csv ... 5.csv
 │   ├── Towsif_back_1.csv ... 5.csv
-│   ├── Areeb_side_1.csv ... 5.csv             # Side Falls (15 recordings)
+│   ├── Areeb_side_1.csv ... 5.csv            # Side Falls (15 recordings)
 │   ├── Raffay_side_1.csv ... 5.csv
 │   └── Towsif_side_1.csv ... 5.csv
 │
-└── Not/                                       # 51 Non-Fall ADL Recordings (Class 0)
-    ├── Areeb_walk_1.csv ... 7.csv             # Normal Walking (21 recordings)
+└── Not/                                      # 51 Non-Fall ADL Recordings (Class 0)
+    ├── Areeb_walk_1.csv ... 7.csv            # Normal Walking (21 recordings)
     ├── Raffay_walk_1.csv ... 7.csv
     ├── Towsif_walk_1.csv ... 7.csv
-    ├── Areeb_bowing_1.csv ... 5.csv           # Bowing / Bending (15 recordings)
+    ├── Areeb_bowing_1.csv ... 5.csv          # Bowing / Bending (15 recordings)
     ├── Raffay_bowing_1.csv ... 5.csv
     ├── Towsif_bowing_1.csv ... 5.csv
-    ├── Areeb_squat_1.csv ... 5.csv            # Squatting / Crouching (15 recordings)
+    ├── Areeb_squat_1.csv ... 5.csv           # Squatting / Crouching (15 recordings)
     ├── Raffay_squat_1.csv ... 5.csv
     └── Towsif_squat_1.csv ... 5.csv
 ```
