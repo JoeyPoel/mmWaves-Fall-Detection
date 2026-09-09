@@ -133,6 +133,12 @@ The pipeline implements **Algorithm 1** from the mmFall paper:
 > [!NOTE]
 > This transformation mathematically preserves the exact sample mean $\hat{\mu}$ and covariance matrix $\hat{\Sigma}$ of the original radar reflections.
 
+### Visual Showcase: 5–20 Sparse Points to Standardized $N=64$ Tensor
+The diagram below illustrates how an incoming sparse mmFall frame ($M \approx 10$ points) is rescaled and padded to produce the exact uniform $N=64$ point cloud:
+
+![Algorithm 1 Oversampling Showcase](images/algorithm1_oversampling_showcase.png)
+*Figure 4.1: End-to-end visual breakdown of Algorithm 1. (1) Raw sparse radar returns scattered around centroid $\mu$ (gold star). (2) Geometry rescaling outward while preserving relative angles, plus centroid replication of $N-M$ padding points at $\mu$. (3) Final standardized $N=64$ point cloud with Doppler velocity color mapping. (4) Empirical distribution of raw points per frame ($M \in [5, 20]$, mean $\approx 10.0$) vs. the standardized $N=64$ tensor input requirement.*
+
 ---
 
 ## 5. Temporal Windowing & Ground-Truth Labeling Protocol

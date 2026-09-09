@@ -25,8 +25,8 @@ We surveyed and evaluated several key mmWave radar datasets across the research 
 | **mmFall (Radar-Lab)** ⭐ *(Primary Focus)* | 4D mmWave Radar (77 GHz) | Sequenced frames of $(x, y, z)$ spatial points with Doppler velocity | Fall detection & trajectory tracking | [GitHub: radar-lab/mmfall](https://github.com/radar-lab/mmfall) |
 | **mmWave Fall Detection Dataset** | TI IWR6843 (60–64 GHz) | CSV columns: `[x, y, z, velocity, snr, noise]` | Fall detection vs. ADLs | [Hugging Face Repository](https://huggingface.co/datasets/SachitanandAgalduti/mmwave-fall-detection-dataset) |
 | **MiliPoint** | 60/77 GHz mmWave FMCW | Temporal sequences of $(x, y, z)$ coordinates across indoor scenes | Human activity recognition & posture classification | [GitHub: yizzfz/milipoint](https://github.com/yizzfz/milipoint) |
-| **mm-Pose** | TI IWR1443 (77 GHz) | $(x, y, z)$ point clouds synchronized with 3D joint coordinate ground truth | Human pose estimation & tracking | [GitHub: sensor-research/mm-Pose](https://github.com/sensor-research/mm-Pose) |
-| **mmBody** | Multi-sensor mmWave Transceivers | Large-scale $(x, y, z)$ point cloud frames mapped to SMPL mesh vertices | 3D human body mesh and skeleton reconstruction | [GitHub: zeng-x/mmBody](https://github.com/zeng-x/mmBody) |
+| **mm-Pose** | TI IWR1443 (77 GHz) | $(x, y, z)$ point clouds synchronized with 3D joint coordinate ground truth | Human pose estimation & tracking | [GitHub: sensor-research/mm-Pose](https://github.com/KylinC/mPose3D) |
+| **mmBody** | Multi-sensor mmWave Transceivers | Large-scale $(x, y, z)$ point cloud frames mapped to SMPL mesh vertices | 3D human body mesh and skeleton reconstruction | [GitHub: zeng-x/mmBody](https://github.com/Chen3110/mmBody) |
 
 ### 💡 Why `mmFall`?
 We primarily focus on **`mmFall`** because:

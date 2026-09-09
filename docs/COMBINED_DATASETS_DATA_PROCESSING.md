@@ -63,6 +63,9 @@ Both datasets are resampled to an exact dimension of **$N = 64$ points per frame
 $$\mathbf{p}_i' = \sqrt{\frac{N}{M}} \cdot (\mathbf{p}_i - \hat{\mu}) + \hat{\mu}, \quad i = 1, \dots, M$$
 with centroid padding for remaining positions.
 
+![Algorithm 1 Oversampling Showcase](images/algorithm1_oversampling_showcase.png)
+*Figure 3.1: Cross-dataset standardization via Algorithm 1. Sparse radar returns ($M \in [5, 20]$ points per frame) across both mmFall (77 GHz) and TI (60 GHz) are geometrically rescaled and centroid-padded to a consistent $N=64$ points, enabling seamless joint training.*
+
 ### 3.3 Temporal Clip Harmonization
 * **Duration**: Exactly 10 frames ($1.0\text{ second}$ of motion at $10\text{ FPS}$).
 * **Feature Schema**: Every point vector carries 4 identical channels: $[\Delta X, \Delta Y, Z, v_{\text{doppler}}]$.

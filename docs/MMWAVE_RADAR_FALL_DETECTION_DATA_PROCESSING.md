@@ -119,6 +119,12 @@ In the raw CSV files, the number of detected points per frame fluctuates between
 $$\mathbb{E}[\mathbf{p}'] = \hat{\mu}, \quad \text{Cov}(\mathbf{p}') = \hat{\Sigma}$$
 This guarantees that spatial center-of-mass and orientation covariance are mathematically identical to the raw point cloud.
 
+### Visual Showcase: 5–20 Sparse Points to Standardized $N=64$ Tensor
+The diagram below demonstrates how an incoming sparse frame ($M=8$ to $12$ reflections) is rescaled and padded to produce the exact uniform $N=64$ point cloud:
+
+![Algorithm 1 Oversampling Showcase](images/algorithm1_oversampling_showcase.png)
+*Figure 4.1: End-to-end visual breakdown of Algorithm 1. (1) Raw sparse radar returns scattered around centroid $\mu$ (gold star). (2) Geometry rescaling outward while preserving relative angles, plus centroid replication of $N-M$ padding points at $\mu$. (3) Final standardized $N=64$ point cloud with Doppler velocity color mapping. (4) Empirical distribution of raw points per frame ($M \in [6, 15]$, mean $\approx 9.9$) vs. the standardized $N=64$ tensor input requirement.*
+
 ---
 
 ## 5. Temporal Windowing & Position-Invariant Centering
