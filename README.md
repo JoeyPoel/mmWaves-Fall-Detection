@@ -36,48 +36,89 @@ We primarily focus on **`mmFall`** because:
 
 ---
 
-## 📁 Repository Structure & Workflows
+## 📁 Repository Structure (3 Parallel Dataset Pipelines)
 
 ```text
 mmWaves-Fall-Detection/
-├── mmfall_explorer.ipynb                      # Interactive visual explorer & action decoder for mmFall
-├── mmwave_radar_fall_detection_explorer.ipynb # Interactive reader for TI IWR6843 CSV fall dataset
-├── epa.ipynb / eda_mmfall.ipynb               # Exploratory Pattern Analysis & 4D radar feature distributions
-├── mmfall_data_preparation.ipynb              # Data cleaning, outlier filtering, & 1:1 balance pipeline
-├── train_cnn_mmfall.ipynb                     # PyTorch Spatial-Temporal CNN training & evaluation
-├── datasets/
-│   ├── mmfall/                                # Raw mmFall dataset directory (Action folders 1-32)
-│   └── preprocessed/                          # Cleaned, balanced feature tensors (X, y, metadata)
+├── README.md                                  # Top-level project overview & roadmap
+│
+├── docs/                                      # Documentation & Research References
+│   ├── MMFALL_DATA_PROCESSING.md              # Detailed mathematical processing guide
+│   └── mmfallpaper.pdf                        # Original mmFall research publication
+│
+├── mmfall/                                    # 📡 1. mmFall Dataset Pipeline (77 GHz, TI IWR1443)
+│   ├── README.md                              # mmFall sequential workflow guide
+│   ├── 01_mmfall_explorer.ipynb               # 1. Interactive 3D data explorer & action decoder
+│   ├── 02_mmfall_data_preparation.ipynb       # 2. Outlier filtering, oversampling, & balancing
+│   ├── 03_train_cnn_mmfall.ipynb              # 3. Spatial-Temporal 2D CNN baseline (88.2% acc)
+│   └── representations/                       # 4. Multi-Representation Research Benchmark
+│       ├── train_rep1_spectrogram_resnet18.ipynb  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+│       ├── train_rep2_projections_resnet18.ipynb  # Rep 2: Orthogonal Projections (ResNet-18)
+│       ├── train_rep3_pointnet_3d.ipynb           # Rep 3: Native 3D Point Set (PointNet++)
+│       └── compare_radar_representations.ipynb     # Comparative benchmark synthesis & ROC curves
+│
+├── mmwave-radar-fall-detection/               # 📡 2. TI IWR6843 Dataset Pipeline (60–64 GHz CSV Data)
+│   ├── README.md                              # TI IWR6843 sequential workflow guide
+│   ├── 01_mmwave_radar_fall_detection_explorer.ipynb         # 1. Interactive CSV reader & 4D scrubber
+│   ├── 02_mmwave_radar_fall_detection_data_preparation.ipynb # 2. Outlier filtering, oversampling, & balancing
+│   ├── 03_train_cnn_mmwave_radar_fall_detection.ipynb        # 3. Spatial-Temporal 2D CNN baseline
+│   └── representations/                                      # 4. Multi-Representation Benchmark
+│       ├── train_rep1_spectrogram_resnet18.ipynb  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+│       ├── train_rep2_projections_resnet18.ipynb  # Rep 2: Orthogonal Projections (ResNet-18)
+│       ├── train_rep3_pointnet_3d.ipynb           # Rep 3: Native 3D Point Set (PointNet++)
+│       └── compare_radar_representations.ipynb     # Comparative benchmark synthesis & ROC curves
+│
+├── combined_mmfall_mmwave_radar/              # 📡 3. Combined Multi-Sensor Benchmark (77 GHz + 60 GHz)
+│   ├── README.md                              # Combined dataset workflow guide
+│   ├── 01_combined_datasets_explorer.ipynb    # 1. Cross-dataset feature distribution comparisons
+│   ├── 02_combined_datasets_data_preparation.ipynb # 2. Unified multi-sensor dataset merging (1,910 clips)
+│   ├── 03_train_cnn_combined_datasets.ipynb   # 3. Multi-Sensor 4D CNN baseline training
+│   └── representations/                       # 4. Multi-Representation Benchmark
+│       ├── train_rep1_spectrogram_resnet18.ipynb  # Rep 1: Micro-Doppler Spectrogram (ResNet-18)
+│       ├── train_rep2_projections_resnet18.ipynb  # Rep 2: Orthogonal Projections (ResNet-18)
+│       ├── train_rep3_pointnet_3d.ipynb           # Rep 3: Native 3D Point Set (PointNet++)
+│       └── compare_radar_representations.ipynb     # Comparative benchmark synthesis & ROC curves
+│
+├── datasets/                                  # Data Storage (Raw & Preprocessed)
+│   ├── mmfall/                                # Raw mmFall dataset (DS0, DS1, DS2)
+│   ├── mmwave-radar-fall-detection/          # Raw TI IWR6843 GatheredData (3 subjects)
+│   ├── milipoint/                             # MiliPoint HAR dataset
+│   ├── mmBody/                                # mmBody 3D mesh dataset
+│   └── preprocessed/                          # Cleaned, 1:1 balanced feature tensors
 │       ├── X_mmfall_clean_balanced.npy        # Shape: (1182, 10, 64, 4)
 │       ├── y_mmfall_clean_balanced.npy        # Binary labels (0 = ADL, 1 = Fall)
-│       └── mmfall_cleaned_metadata.csv        # Motion clip metadata & statistics
-└── models/
-    └── cnn_mmfall_best.pth                    # Saved PyTorch CNN model checkpoint
+│       ├── X_ti_clean_balanced.npy            # Shape: (728, 10, 64, 4)
+│       ├── y_ti_clean_balanced.npy            # Binary labels (0 = ADL, 1 = Fall)
+│       ├── X_combined_clean_balanced.npy      # Shape: (1910, 10, 64, 4)
+│       ├── y_combined_clean_balanced.npy      # Binary labels (0 = ADL, 1 = Fall)
+│       ├── X_rep1_spectrogram_*.npy           # 64x64x3 Micro-Doppler Spectrograms
+│       ├── X_rep2_projections_*.npy           # 64x64x3 Orthogonal Projections
+│       └── X_rep3_pointset_*.npy              # 5x640 Native 3D Point Sets
+│
+└── models/                                    # Saved Checkpoints & Evaluation Metrics
+    ├── cnn_mmfall_best.pth                    # Best PyTorch 4D CNN weights (mmFall)
+    ├── resnet18_rep1_spectrogram.pth          # Best ResNet-18 Spectrogram weights (mmFall)
+    ├── cnn_ti_best.pth                        # Best PyTorch 4D CNN weights (TI IWR6843)
+    └── cnn_combined_best.pth                  # Best PyTorch 4D CNN weights (Combined)
 ```
 
 ---
 
-## 🚀 Key Notebooks & Getting Started
+## 🚀 Workflows & Getting Started
 
-1. **`mmfall_explorer.ipynb`**:
-   - Decodes folder structures, action codes, and subject IDs.
-   - Interactive 3D point cloud visualizer with interactive frame sliders.
-2. **`mmfall_data_preparation.ipynb`**:
-   - Filters spatial noise, crops bounding boxes ($x, y \in [-3, 3]\text{m}$, $z \in [-1, 2.5]\text{m}$).
-   - Resamples frames to uniform point counts ($N=64$) and extracts 10-frame sliding windows ($1.0\text{s}$ clip length).
-   - Exports preprocessed `.npy` feature tensors.
-3. **`train_cnn_mmfall.ipynb`**:
-   - Loads preprocessed tensors, splits into Train (80%) and Test (20%).
-   - Trains `Radar4DCNN` model over 25 epochs.
-   - Generates Loss/Accuracy curves, Confusion Matrix, ROC-AUC curve (0.947), and single-clip inference.
+Each of the three dataset folders follows an identical **4-step sequence**:
+
+1. **`01_*_explorer.ipynb`**: Visualizes raw 4D point clouds, understands action codes and subjects, and scrubs frame-by-frame through individual trials.
+2. **`02_*_data_preparation.ipynb`**: Filters spatial and SNR noise, applies room geometry adjustments, oversamples point clouds to $N=64$ using Algorithm 1, extracts 10-frame sliding windows, and guarantees an exact 1:1 balanced dataset.
+3. **`03_*_train_cnn.ipynb`**: Trains a PyTorch 2D Spatial-Temporal `Radar4DCNN` baseline model.
+4. **`representations/`**: Trains and evaluates ResNet-18 Kinematic, ResNet-18 Spatial, and PointNet++ Geometric models across the three representation formats, comparing ROC-AUC curves in `compare_radar_representations.ipynb`.
 
 ---
 
-## 📈 Model Architecture & Results (`Radar4DCNN`)
+## 📈 Baseline Model Performance Summary (`Radar4DCNN`)
 
-- **Input Tensor**: `(Batch_Size, 4_Channels, 10_Frames, 64_Points)` where 4 channels represent $[x, y, z, v_{\text{doppler}}]$.
-- **Architecture**: 3 2D Conv Blocks with Batch Normalization, ReLU, MaxPool2d / AdaptiveAvgPool2d, Dropout ($p=0.4$), and Dense Layers.
-- **Test Performance**:
-  - **Accuracy**: `88.19%`
-  - **ROC-AUC**: `0.9470`
-  - **ADL Specificity**: `95.0%` (113/119 ADL test clips correctly identified)
+| Dataset Pipeline | Radar Frequency | Balanced Clips | Accuracy | ROC-AUC | ADL Specificity | Checkpoint |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **[`mmfall/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/mmfall)** | 77 GHz | 1,182 clips | **88.19%** | **0.9470** | **95.00%** | [`models/cnn_mmfall_best.pth`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/models/cnn_mmfall_best.pth) |
+| **[`mmwave-radar-fall-detection/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/mmwave-radar-fall-detection)** | 60–64 GHz | 728 clips | **99.32%** | **1.0000** | **100.00%** | [`models/cnn_ti_best.pth`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/models/cnn_ti_best.pth) |
+| **[`combined_mmfall_mmwave_radar/`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/combined_mmfall_mmwave_radar)** | 77 GHz + 60 GHz | 1,910 clips | **93.98%** | **0.9867** | **95.29%** | [`models/cnn_combined_best.pth`](file:///c:/Users/joeyw/GitProjects/mmWaves-Fall-Detection/models/cnn_combined_best.pth) |
