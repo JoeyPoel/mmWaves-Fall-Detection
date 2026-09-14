@@ -1,0 +1,67 @@
+{
+    "dataset": "mmfall",
+    "train_files": [
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS1\\DS1_4falls.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_b_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_bf_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_bf_02.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_bf_03.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_ff_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_ff_02.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_ff_03.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_j_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_j_02.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_j_03.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_lf_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_lf_02.npy"
+    ],
+    "val_files": [
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_c_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_c_02.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_c_03.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_c_04.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_c_05.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_sf_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_sf_02.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_sf_03.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_sf_04.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_sf_05.npy"
+    ],
+    "test_files": [
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS1\\DS1_4normal.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_rf_01.npy",
+        "C:\\Users\\joeyw\\GitProjects\\mmWaves-Fall-Detection\\datasets\\mmfall\\data\\DS2\\DS2_rf_02.npy"
+    ],
+    "train_categories": [
+        1,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1
+    ],
+    "val_categories": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        1
+    ],
+    "test_categories": [
+        0,
+        1,
+        1
+    ]
+}
