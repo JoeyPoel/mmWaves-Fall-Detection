@@ -1,0 +1,125 @@
+{
+    "mmfall": {
+        "Rep1_Spectrogram": {
+            "preprocessing_latency_ms": 0.1432,
+            "cpu_inference_latency_b1_ms": 1.9701,
+            "cpu_inference_latency_b16_ms": 18.524,
+            "total_e2e_latency_ms": 2.1134,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.59,
+            "preproc_speedup_vs_rep1": 1.0
+        },
+        "Rep2_Projections": {
+            "preprocessing_latency_ms": 0.234,
+            "cpu_inference_latency_b1_ms": 1.8866,
+            "cpu_inference_latency_b16_ms": 18.6746,
+            "total_e2e_latency_ms": 2.1206,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.59,
+            "preproc_speedup_vs_rep1": 0.61
+        },
+        "Rep3_PointSet": {
+            "preprocessing_latency_ms": 0.0015,
+            "cpu_inference_latency_b1_ms": 1.4289,
+            "cpu_inference_latency_b16_ms": 15.2681,
+            "total_e2e_latency_ms": 1.4304,
+            "realtime_viable_10hz": true,
+            "parameters_count": 76034,
+            "parameters_k": 76.03,
+            "flops_count": 52904448,
+            "flops_m": 52.9,
+            "checkpoint_size_kb": 311.59,
+            "preproc_speedup_vs_rep1": 95.65
+        }
+    },
+    "mmwave": {
+        "Rep1_Spectrogram": {
+            "preprocessing_latency_ms": 0.2879,
+            "cpu_inference_latency_b1_ms": 2.0625,
+            "cpu_inference_latency_b16_ms": 20.19,
+            "total_e2e_latency_ms": 2.3504,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.47,
+            "preproc_speedup_vs_rep1": 1.0
+        },
+        "Rep2_Projections": {
+            "preprocessing_latency_ms": 0.3777,
+            "cpu_inference_latency_b1_ms": 2.0848,
+            "cpu_inference_latency_b16_ms": 20.9366,
+            "total_e2e_latency_ms": 2.4625,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.47,
+            "preproc_speedup_vs_rep1": 0.76
+        },
+        "Rep3_PointSet": {
+            "preprocessing_latency_ms": 0.0019,
+            "cpu_inference_latency_b1_ms": 1.0686,
+            "cpu_inference_latency_b16_ms": 6.4072,
+            "total_e2e_latency_ms": 1.0704,
+            "realtime_viable_10hz": true,
+            "parameters_count": 75778,
+            "parameters_k": 75.78,
+            "flops_count": 26485248,
+            "flops_m": 26.49,
+            "checkpoint_size_kb": 308.01,
+            "preproc_speedup_vs_rep1": 155.1
+        }
+    },
+    "combined": {
+        "Rep1_Spectrogram": {
+            "preprocessing_latency_ms": 0.2437,
+            "cpu_inference_latency_b1_ms": 2.1668,
+            "cpu_inference_latency_b16_ms": 22.0539,
+            "total_e2e_latency_ms": 2.4106,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.65,
+            "preproc_speedup_vs_rep1": 1.0
+        },
+        "Rep2_Projections": {
+            "preprocessing_latency_ms": 0.3481,
+            "cpu_inference_latency_b1_ms": 2.5385,
+            "cpu_inference_latency_b16_ms": 21.538,
+            "total_e2e_latency_ms": 2.8866,
+            "realtime_viable_10hz": true,
+            "parameters_count": 102082,
+            "parameters_k": 102.08,
+            "flops_count": 82592000,
+            "flops_m": 82.59,
+            "checkpoint_size_kb": 409.65,
+            "preproc_speedup_vs_rep1": 0.7
+        },
+        "Rep3_PointSet": {
+            "preprocessing_latency_ms": 0.0016,
+            "cpu_inference_latency_b1_ms": 1.4559,
+            "cpu_inference_latency_b16_ms": 15.0732,
+            "total_e2e_latency_ms": 1.4575,
+            "realtime_viable_10hz": true,
+            "parameters_count": 75778,
+            "parameters_k": 75.78,
+            "flops_count": 52904448,
+            "flops_m": 52.9,
+            "checkpoint_size_kb": 308.19,
+            "preproc_speedup_vs_rep1": 149.24
+        }
+    }
+}
