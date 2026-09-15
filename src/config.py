@@ -1,5 +1,5 @@
 """
-Central Dataclass Configuration Registry for mmWave Datasets
+Central Dataclass Configuration Registry for TI mmWave Radar Fall Detection Dataset.
 """
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,7 +16,7 @@ class DatasetConfig:
     manifest_name: str
     target_n: int = 32
     window_size: int = 10
-    stride: int = 2
+    stride: int = 5
     min_frames: int = 6
     spatial_box: List[float] = None # [x_min, x_max, y_min, y_max, z_min, z_max]
     min_snr: float = 100.0
@@ -37,31 +37,17 @@ CHECKPOINTS_DIR.mkdir(parents=True, exist_ok=True)
 BENCHMARKS_DIR.mkdir(parents=True, exist_ok=True)
 
 DATASET_CONFIGS = {
-    "mmfall": DatasetConfig(
-        dataset_key="mmfall",
-        name="mmFall (TI IWR1443)",
-        frequency_ghz="77 GHz",
-        raw_data_dir=PROJECT_ROOT / "datasets" / "mmfall" / "data",
-        preproc_dir=PREPROC_DIR,
-        models_dir=MODELS_DIR,
-        manifest_name="mmfall_dataset_split.json"
-    ),
-    "mmwave": DatasetConfig(
-        dataset_key="mmwave",
-        name="TI IWR6843 Fall Detection",
+    "ti": DatasetConfig(
+        dataset_key="ti",
+        name="TI IWR6843 mmWave Radar Fall Detection Dataset",
         frequency_ghz="60–64 GHz",
         raw_data_dir=PROJECT_ROOT / "datasets" / "mmwave-radar-fall-detection" / "GatheredData",
         preproc_dir=PREPROC_DIR,
         models_dir=MODELS_DIR,
-        manifest_name="ti_dataset_split.json"
-    ),
-    "combined": DatasetConfig(
-        dataset_key="combined",
-        name="Combined Multi-Sensor Benchmark (77 GHz + 60 GHz)",
-        frequency_ghz="77 GHz + 60 GHz",
-        raw_data_dir=PROJECT_ROOT / "datasets",
-        preproc_dir=PREPROC_DIR,
-        models_dir=MODELS_DIR,
-        manifest_name="combined_dataset_split.json"
+        manifest_name="ti_dataset_loso_split.json"
     )
 }
+# Aliases for backwards compatibility
+DATASET_CONFIGS["mmwave"] = DATASET_CONFIGS["ti"]
+DATASET_CONFIGS["mmfall"] = DATASET_CONFIGS["ti"]
+

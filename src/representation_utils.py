@@ -5,19 +5,33 @@ def generate_spectrogram_rep(X_raw: np.ndarray, variant: str = "raw") -> np.ndar
     """
     Rep 1: Micro-Doppler Spectrogram (N, 3, 64, 64)
     Variants: 'raw' | 'log_scaled' | 'smooth'
+    Channel 0: Doppler Velocity Histogram
+    Channel 1: Kinetic Energy Histogram (v^2)
+    Channel 2: Spatial Height (Z) Distribution Histogram
     """
     N = len(X_raw)
     specs = np.zeros((N, 3, 64, 64), dtype=np.float32)
     for i in range(N):
         clip = X_raw[i] # (10, 32, 4)
+        c0_10 = np.zeros((64, 10), dtype=np.float32)
+        c1_10 = np.zeros((64, 10), dtype=np.float32)
+        c2_10 = np.zeros((64, 10), dtype=np.float32)
+
         for t in range(10):
             v_vals = clip[t, :, 3]
-            hist, _ = np.histogram(v_vals, bins=64, range=(-3.0, 3.0))
-            hist_ke, _ = np.histogram(v_vals, bins=64, range=(-3.0, 3.0), weights=v_vals**2)
-            
-            specs[i, 0, :, t*6:(t+1)*6] = np.tile(hist[:, None], (1, 6))
-            specs[i, 1, :, t*6:(t+1)*6] = np.tile(hist_ke[:, None], (1, 6))
-            specs[i, 2, :, t*6:(t+1)*6] = np.tile(np.abs(hist)[:, None], (1, 6))
+            z_vals = clip[t, :, 2]
+            h_v, _ = np.histogram(v_vals, bins=64, range=(-3.0, 3.0))
+            h_ke, _ = np.histogram(v_vals, bins=64, range=(-3.0, 3.0), weights=v_vals**2)
+            h_z, _ = np.histogram(z_vals, bins=64, range=(-0.5, 2.2))
+
+            c0_10[:, t] = h_v
+            c1_10[:, t] = h_ke
+            c2_10[:, t] = h_z
+
+        # Smooth 2D interpolation over time (10 -> 64)
+        specs[i, 0] = ndimage.zoom(c0_10, (1.0, 6.4), order=1)[:64, :64]
+        specs[i, 1] = ndimage.zoom(c1_10, (1.0, 6.4), order=1)[:64, :64]
+        specs[i, 2] = ndimage.zoom(c2_10, (1.0, 6.4), order=1)[:64, :64]
 
         if variant == "log_scaled":
             specs[i] = np.log1p(specs[i])

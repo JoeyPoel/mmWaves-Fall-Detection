@@ -17,27 +17,44 @@ def train_and_evaluate(model: nn.Module, X_train: np.ndarray, y_train: np.ndarra
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
-    tr_ds = TensorDataset(torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.long))
+    train_y = torch.tensor(y_train, dtype=torch.long)
+    tr_ds = TensorDataset(torch.tensor(X_train, dtype=torch.float32), train_y)
     va_ds = TensorDataset(torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.long))
     te_ds = TensorDataset(torch.tensor(X_test, dtype=torch.float32), torch.tensor(y_test, dtype=torch.long))
 
-    tr_loader = DataLoader(tr_ds, batch_size=batch_size, shuffle=True)
+    # PyTorch Balanced Sampling via WeightedRandomSampler
+    class_counts = torch.bincount(train_y)
+    class_weights = 1.0 / class_counts.float()
+    sample_weights = class_weights[train_y]
+
+    sampler = torch.utils.data.WeightedRandomSampler(
+        weights=sample_weights,
+        num_samples=len(sample_weights),
+        replacement=True
+    )
+
+    tr_loader = DataLoader(tr_ds, batch_size=batch_size, sampler=sampler, shuffle=False)
     va_loader = DataLoader(va_ds, batch_size=batch_size, shuffle=False)
     te_loader = DataLoader(te_ds, batch_size=batch_size, shuffle=False)
 
-    # Class-weighted loss to handle training imbalance without discarding data
-    class_counts = np.bincount(y_train)
-    c0_cnt = max(class_counts[0], 1) if len(class_counts) > 0 else 1
-    c1_cnt = max(class_counts[1], 1) if len(class_counts) > 1 else 1
-    class_weights = torch.tensor([len(y_train) / (2.0 * c0_cnt), len(y_train) / (2.0 * c1_cnt)], dtype=torch.float32).to(device)
-    criterion = nn.CrossEntropyLoss(weight=class_weights)
+    # Sanity Check: Iterate through first batch to confirm ~50/50 batch class balance
+    first_bx, first_by = next(iter(tr_loader))
+    first_b_counts = torch.bincount(first_by)
+    c0_b = first_b_counts[0].item() if len(first_b_counts) > 0 else 0
+    c1_b = first_b_counts[1].item() if len(first_b_counts) > 1 else 0
+    print(f"[Sanity Check] Train DataLoader First Batch Class Distribution: ADL(0)={c0_b}, Fall(1)={c1_b} (Batch Size={len(first_by)})", flush=True)
 
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5, patience=3)
 
     best_val_loss = float("inf")
-    best_val_f2 = -1.0
+    best_val_f1 = -1.0
     best_threshold = 0.50
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+
+    patience = 8
+    patience_counter = 0
 
     for ep in range(epochs):
         model.train()
@@ -73,36 +90,53 @@ def train_and_evaluate(model: nn.Module, X_train: np.ndarray, y_train: np.ndarra
         v_probs_arr = np.array(v_probs)
         v_targets_arr = np.array(v_targets)
 
-        # Threshold sweep on natural validation set (0.10 to 0.90) to optimize Fall F2-Score (Recall heavily weighted)
+        # Threshold sweep on natural validation set (0.10 to 0.95) to maximize Fall-Prioritized F2-Score
         ep_best_f2 = -1.0
         ep_best_thresh = 0.50
+
         if len(v_targets_arr) > 0 and len(np.unique(v_targets_arr)) > 1:
-            for thresh in np.arange(0.10, 0.90, 0.02):
+            for thresh in np.arange(0.10, 0.96, 0.02):
                 preds_th = (v_probs_arr >= thresh).astype(int)
-                f2_th = fbeta_score(v_targets_arr, preds_th, beta=2.0, zero_division=0)
+                f2_th = float(fbeta_score(v_targets_arr, preds_th, beta=2.0, zero_division=0))
                 if f2_th > ep_best_f2:
                     ep_best_f2 = f2_th
                     ep_best_thresh = thresh
-        else:
-            ep_best_f2 = 0.0
 
         val_preds_opt = (v_probs_arr >= ep_best_thresh).astype(int) if len(v_probs_arr) > 0 else []
         val_acc = accuracy_score(v_targets_arr, val_preds_opt) if len(v_targets_arr) > 0 else 0.0
         val_rec = recall_score(v_targets_arr, val_preds_opt, zero_division=0) if len(v_targets_arr) > 0 else 0.0
+        val_prec = precision_score(v_targets_arr, val_preds_opt, zero_division=0) if len(v_targets_arr) > 0 else 0.0
         val_f1 = f1_score(v_targets_arr, val_preds_opt, zero_division=0) if len(v_targets_arr) > 0 else 0.0
-        val_f2 = ep_best_f2
+        val_f2 = ep_best_f2 if ep_best_f2 >= 0 else 0.0
 
-        if val_f2 > best_val_f2 or (abs(val_f2 - best_val_f2) < 1e-4 and val_loss < best_val_loss):
-            best_val_f2 = val_f2
+        # Model Checkpoint Selection:
+        # Save when Validation Fall F2-Score improves OR when F2 is tied and Val Loss decreases
+        is_new_best = False
+        if ep > 0:  # Exclude Epoch 1
+            if val_f2 > best_val_f1 + 1e-4:  # best_val_f1 variable re-purposed as best_val_f2
+                is_new_best = True
+            elif abs(val_f2 - best_val_f1) <= 1e-4 and val_loss < best_val_loss - 1e-4:
+                is_new_best = True
+
+        scheduler.step(val_f2)
+
+        if is_new_best:
+            best_val_f1 = val_f2
             best_val_loss = val_loss
             best_threshold = ep_best_thresh
             torch.save(model.state_dict(), checkpoint_path)
             saved_mark = " [BEST SAVED]"
+            patience_counter = 0
         else:
             saved_mark = ""
+            patience_counter += 1
 
-        if (ep + 1) % 5 == 0 or ep == 0 or (ep + 1) == epochs:
-            print(f"Epoch [{ep+1:02d}/{epochs:02d}] Tr Loss: {train_loss:.4f}, Acc: {train_acc*100:.2f}% | Val Loss: {val_loss:.4f}, Acc: {val_acc*100:.2f}%, F2: {val_f2*100:.2f}%, Rec: {val_rec*100:.2f}% (Thresh: {ep_best_thresh:.2f}){saved_mark}")
+        if is_new_best or (ep + 1) % 5 == 0 or (ep + 1) == epochs:
+            print(f"Epoch [{ep+1:02d}/{epochs:02d}] Tr Loss: {train_loss:.4f}, Acc: {train_acc*100:.2f}% | Val Loss: {val_loss:.4f}, Acc: {val_acc*100:.2f}%, F2: {val_f2*100:.2f}%, Rec: {val_rec*100:.2f}%, Prec: {val_prec*100:.2f}% (Thresh: {ep_best_thresh:.2f}){saved_mark}", flush=True)
+
+        if patience_counter >= patience:
+            print(f"Early stopping triggered at Epoch [{ep+1:02d}/{epochs:02d}] (Validation F2 did not improve for {patience} epochs).", flush=True)
+            break
 
     # Evaluate Best Checkpoint on Test Set using Frozen Optimal Threshold
     if checkpoint_path.exists():
@@ -130,8 +164,8 @@ def train_and_evaluate(model: nn.Module, X_train: np.ndarray, y_train: np.ndarra
     cm = confusion_matrix(targets_arr, preds_arr)
     fpr = float(cm[0, 1] / (cm[0, 0] + cm[0, 1])) if (cm[0, 0] + cm[0, 1]) > 0 else 0.0
 
-    print(f"\n--- Test Results: {rep_key or 'Radar4DCNN'} (Frozen Val Decision Threshold: {best_threshold:.2f}) ---")
-    print(f"Test Accuracy: {acc*100:.2f}% | ROC-AUC: {auc:.4f} | Recall: {rec*100:.2f}% | Precision: {prec*100:.2f}% | F1: {f1*100:.2f}%")
+    print(f"\n--- Test Results: {rep_key or 'Radar4DCNN'} (Frozen Val Decision Threshold: {best_threshold:.2f}) ---", flush=True)
+    print(f"Test Accuracy: {acc*100:.2f}% | ROC-AUC: {auc:.4f} | Recall: {rec*100:.2f}% | Precision: {prec*100:.2f}% | F1: {f1*100:.2f}%", flush=True)
 
     if results_json_path and rep_key:
         import datetime

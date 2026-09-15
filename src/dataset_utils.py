@@ -95,64 +95,50 @@ def safe_group_split(files, labels, groups, test_size=0.20, random_state=42):
     tr_files, te_files, y_tr, y_te = train_test_split(files, labels, test_size=test_size, random_state=random_state, stratify=labels)
     return tr_files, te_files, y_tr, y_te
 
-def create_dataset_split_manifest(dataset_key: str) -> Path:
-    cfg = DATASET_CONFIGS[dataset_key]
+def create_dataset_split_manifest(dataset_key: str = "ti") -> Path:
+    from .dataset_parser import get_loso_splits, extract_label
+    cfg = DATASET_CONFIGS.get(dataset_key, DATASET_CONFIGS["ti"])
     cfg.preproc_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = cfg.preproc_dir / cfg.manifest_name
 
-    if dataset_key == "mmfall":
-        data_dir = cfg.raw_data_dir
-        ds_files = sorted([str(p.resolve()) for p in (list((data_dir / "DS1").glob("*.npy")) + list((data_dir / "DS2").glob("*.npy")))
-                           if p.stem not in ["normal_test_data", "normal_train_data", "DS2"]])
-        categories = [1 if ("fall" in Path(p).stem.lower() or any(k in Path(p).stem for k in ["_bf_", "_ff_", "_lf_", "_rf_", "_sf_"])) else 0 for p in ds_files]
-        # Group by recording trial / session prefix
-        groups = [f"{Path(p).parent.name}_{Path(p).stem.split('_')[1] if '_' in Path(p).stem else Path(p).stem}" for p in ds_files]
-        
-        tr_val_files, te_files, y_tr_val, y_te = safe_group_split(ds_files, categories, groups, test_size=0.20, random_state=42)
-        tr_val_groups = [groups[ds_files.index(f)] for f in tr_val_files]
-        tr_files, val_files, y_tr, y_val = safe_group_split(tr_val_files, y_tr_val, tr_val_groups, test_size=0.20, random_state=42)
-        
-        manifest = {
-            "dataset": dataset_key,
-            "train_files": tr_files, "val_files": val_files, "test_files": te_files,
-            "train_categories": y_tr, "val_categories": y_val, "test_categories": y_te
-        }
+    loso_splits = get_loso_splits()
+    fold0 = loso_splits[0]
 
-    elif dataset_key == "mmwave":
-        data_dir = cfg.raw_data_dir
-        fall_files = [str(p.resolve()) for p in (data_dir / "Fall").glob("*.csv")]
-        not_files = [str(p.resolve()) for p in (data_dir / "Not").glob("*.csv")]
-        all_csvs = sorted(fall_files + not_files)
-        labels = [1 if Path(p).parent.name.lower() == "fall" else 0 for p in all_csvs]
-        # Participant subject grouping (e.g. Areeb, Raffay, Towsif)
-        groups = [Path(p).stem.split('_')[0] for p in all_csvs]
-        
-        tr_val_files, te_files, y_tr_val, y_te = safe_group_split(all_csvs, labels, groups, test_size=0.20, random_state=42)
-        tr_val_groups = [groups[all_csvs.index(f)] for f in tr_val_files]
-        tr_files, val_files, y_tr, y_val = safe_group_split(tr_val_files, y_tr_val, tr_val_groups, test_size=0.20, random_state=42)
-        
-        manifest = {
-            "dataset": dataset_key,
-            "train_files": tr_files, "val_files": val_files, "test_files": te_files,
-            "train_categories": y_tr, "val_categories": y_val, "test_categories": y_te
-        }
+    train_files = [str(Path(p).resolve()) for p in fold0["train_files"]]
+    val_files = [str(Path(p).resolve()) for p in fold0["val_files"]]
+    test_files = [str(Path(p).resolve()) for p in fold0["test_files"]]
 
-    elif dataset_key == "combined":
-        mf_manifest = json.load(open(cfg.preproc_dir / DATASET_CONFIGS["mmfall"].manifest_name))
-        ti_manifest = json.load(open(cfg.preproc_dir / DATASET_CONFIGS["mmwave"].manifest_name))
-        manifest = {
-            "dataset": dataset_key,
-            "train_files": mf_manifest["train_files"] + ti_manifest["train_files"],
-            "val_files": mf_manifest["val_files"] + ti_manifest["val_files"],
-            "test_files": mf_manifest["test_files"] + ti_manifest["test_files"],
-            "train_categories": mf_manifest["train_categories"] + ti_manifest["train_categories"],
-            "val_categories": mf_manifest["val_categories"] + ti_manifest["val_categories"],
-            "test_categories": mf_manifest["test_categories"] + ti_manifest["test_categories"]
-        }
+    y_tr = [extract_label(Path(p)) for p in train_files]
+    y_va = [extract_label(Path(p)) for p in val_files]
+    y_te = [extract_label(Path(p)) for p in test_files]
+
+    manifest = {
+        "dataset": dataset_key,
+        "train_subjects": fold0.get("train_subjects", ["Raffay", "Towsif"]),
+        "test_subject": fold0["test_subject"],
+        "train_files": train_files,
+        "val_files": val_files,
+        "test_files": test_files,
+        "train_categories": y_tr,
+        "val_categories": y_va,
+        "test_categories": y_te,
+        "all_folds": [
+            {
+                "fold": f["fold"],
+                "train_subjects": f.get("train_subjects", []),
+                "test_subject": f["test_subject"],
+                "train_files": [str(Path(p).resolve()) for p in f["train_files"]],
+                "val_files": [str(Path(p).resolve()) for p in f["val_files"]],
+                "test_files": [str(Path(p).resolve()) for p in f["test_files"]]
+            }
+            for f in loso_splits
+        ]
+    }
 
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=4)
     return manifest_path
+
 
 def extract_dataset_windows_from_manifest(dataset_key: str):
     cfg = DATASET_CONFIGS[dataset_key]
@@ -237,14 +223,20 @@ def extract_dataset_windows_from_manifest(dataset_key: str):
                     ref_x0 = df_win["centroid_x"].iloc[0]
                     ref_y0 = df_win["centroid_y"].iloc[0]
                 else:
-                    label = 1 if fpath.parent.name.lower() == "fall" else 0
+                    is_fall_file = fpath.parent.name.lower() == "fall"
+                    v_max = df_win["v"].abs().max() if len(df_win) > 0 else 0.0
+                    z_range = (df_win["z"].max() - df_win["z"].min()) if len(df_win) > 0 else 0.0
+                    label = 1 if (is_fall_file and (v_max >= 0.8 or z_range >= 0.5)) else 0
                     ref_x0 = df_win["x"].iloc[0]
                     ref_y0 = df_win["y"].iloc[0]
 
+                # O(1) dictionary frame lookup for fast extraction
+                frame_groups = {f_id: group for f_id, group in df_win.groupby("frame")}
+
                 win_frames = []
                 for f_i in range(start_f, end_f + 1):
-                    df_f = df_win[df_win["frame"] == f_i]
-                    if len(df_f) > 0:
+                    if f_i in frame_groups:
+                        df_f = frame_groups[f_i]
                         delta_x = df_f["x"].values - ref_x0
                         delta_y = df_f["y"].values - ref_y0
                         z_vals = df_f["z"].values
@@ -265,17 +257,6 @@ def extract_dataset_windows_from_manifest(dataset_key: str):
         X_arr = np.array(windows, dtype=np.float32)
         y_arr = np.array(labels, dtype=np.int64)
         df_meta = pd.DataFrame(meta)
-
-        if is_train and len(y_arr) > 0:
-            fall_idx = np.where(y_arr == 1)[0]
-            adl_idx = np.where(y_arr == 0)[0]
-            if len(fall_idx) > 0 and len(adl_idx) > 0:
-                n_sample = min(len(fall_idx), len(adl_idx))
-                np.random.seed(42)
-                sampled_fall = np.random.choice(fall_idx, size=n_sample, replace=False)
-                sampled_adl = np.random.choice(adl_idx, size=n_sample, replace=False)
-                balanced_idx = np.sort(np.concatenate([sampled_fall, sampled_adl]))
-                return X_arr[balanced_idx], y_arr[balanced_idx], df_meta.iloc[balanced_idx].reset_index(drop=True)
         return X_arr, y_arr, df_meta
 
     X_train, y_train, df_train_meta = process_file_list(manifest["train_files"], is_train=True)
